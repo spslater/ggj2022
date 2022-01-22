@@ -12,11 +12,14 @@ def act(prompt):
 
 
 class Map:
-    def __init__(self, rooms, start, finish, graph):
+    def __init__(self, rooms, start, finish, graph, **kwargs):
         self.start = start
         self.finish = finish
         self.graph = graph
         self.rooms = gen_rooms(rooms)
+
+        for key, val in kwargs.items():
+            setattr(self, key, val)
 
     def get_room(self, name):
         return self.rooms.get(name)
@@ -29,9 +32,13 @@ class Map:
 
 
 class Player:
-    def __init__(self, items=None):
+    def __init__(self, items=None, **kwargs):
         self.items = items or {}
         self.location = None
+        self.status = {}
+
+        for key, val in kwargs.items():
+            setattr(self, key, val)
 
     def move(self, room):
         self.location = room
@@ -66,11 +73,13 @@ def gen_items(items):
 
 
 class Item:
-    def __init__(self, name, color, weight, desc):
+    def __init__(self, name, **kwargs):
         self.name = name
-        self.color = color
         self.weight = weight
         self.desc = desc
+
+        for key, val in kwargs.items():
+            setattr(self, key, val)
 
     def look(self):
         print(self.desc)
@@ -96,10 +105,13 @@ def gen_rooms(rooms):
 
 
 class Room:
-    def __init__(self, name, desc, items):
+    def __init__(self, name, desc, items, **kwargs):
         self.name = name
         self.desc = desc
         self.items = gen_items(items)
+
+        for key, val in kwargs.items():
+            setattr(self, key, val)
 
     def enter(self):
         print(f"You have entered {self.name}.")
