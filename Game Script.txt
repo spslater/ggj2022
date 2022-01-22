@@ -1,0 +1,213 @@
+[Have a command to look at things, probably with several synonyms that all work. Look, look at, examine, inspect, view, etc. Typing "look" by itself repeats the initial description of the room.]
+
+[Have a command to use things, probalby "use." Sometimes this might prompt the player to say what to use it with, like "Use X with what?" to prompt a "Use X with Y" syntax.]
+
+[Have a command to pick up things, probably with synonyms pick up, take, grab, etc. Maybe have an "inventory" command to show what they currently are holding.]
+
+[Have a command to move, with synonyms go, move, walk etc.]
+
+[Make sure that each scripted command only works if you're in the correct room!]
+
+-----------------------------------------------------------------
+
+You awaken in your dorm room to the clarion sound of your haphazard tower of styrofoam noodle cups and pizza boxes collapsing. There is no apparent cause, so presumably structural fatigue. Your roommate is nowhere to be seen. You are tired and have a headache. You need a shower.
+
+You are standing next to your bed. You see your desk and the garbage pile. To the East lies your roommate's area. To the South lies the door to the hallway (and showers).
+
+[The puzzle is to escape the room and go to the shower. The "move South" command is blocked but will give hints about what is needed. At the end I will have the sequence of messages when attempting to move South over time.]
+
+Look bed:
+You promise it's only this messy because you just got up!
+
+Look garbage pile:
+The pile is only partially collapsed and remains precarious.
+
+Look desk:
+Your desk, comparatively uncluttered but with a worn spot where you normally rest your head. You see your water bottle, a sandwich, and a mechanical engineering textbook. Below the desk is your trash can.
+
+Look water bottle:
+Your trusty water bottle. It is covered with anime stickers. You could probably remove the bottle, and the stickers would still be watertight.
+
+Look sandwich:
+A sandwich of uncertain provenance. There are no visible signs of danger.
+
+Look textbook (or mechanical engineering textbook):
+A super boring textbook/sedative combo. Contains various diagrams and techniques for structural and mechanical engineering.
+
+Look trashcan:
+It is very full, ergo the garbage pile.
+
+Take bed:
+It's bolted to the wall.
+
+Take garbage pile:
+And what, put a giant pile of trash in my pocket?
+
+Take desk:
+It's bolted to the floor.
+
+Take water bottle:
+Why would you want to keep that on your person in your own room?
+
+Take sandwich:
+Doesn't really seem very handy to carry around.
+
+Take textbook:
+But it's heavy!
+
+Take trashcan:
+That sounds hazardous.
+
+Use bed:
+It is still warm, and so comfy. You guess you didn't have anything important to do anyway. GAME OVER
+
+Use garbage pile:
+For what, exactly?
+
+Use desk:
+The bed is comfier.
+
+Use water bottle:
+You take a long pull of lukewarm water. You must have been dehydrated because your headache dissipates and your head clears. You remember that you have a dresser! [This sets a "Hydrated" flag.]
+
+Use water bottle (Hydrated):
+You are no longer thirsty. That Megumin sticker is cute, though!
+
+Use sandwich:
+You take a big bite and immediately realize that not all dangers are visible. Without even getting a chance to swallow, you are doomed. GAME OVER
+
+Use textbook:
+Against all odds, you already finished that homework. Strictly speaking.
+
+Use trashcan:
+That ship has sailed.
+
+Look/take/use dresser (not Hydrated):
+What dresser? [This is different from the standard unsupported command responses, so it could be a clue.]
+
+Look dresser (Hydrated):
+A utilitarian dorm dresser, attached to the wall.
+
+Take dresser (Hydrated):
+It's literally attached to the wall.
+
+Use dresser (Hydrated):
+Searching through the dresser's mostly barren drawers (standing on the rug made of dirty laundry in front of it), you find a phenomenal treasure: a clean towel! [This sets flag "TowelFound".]
+
+Look towel (TowelFound):
+A pristine, possibly never-used cheap blue towel from Target.
+
+Use towel (TowelFound):
+You're perfectly dry.
+
+Take towel (TowelFound):
+You drape the towel over your neck. Towel acquired! [This clears TowelFound and adds TowelHeld.]
+
+Look/use towel (TowelHeld):
+Same as above.
+
+Take towel (TowelHeld):
+You are already holding the towel.
+
+[This is it for your side when you start. Now we do the other side.]
+
+Move East:
+You walk over to your roommate's area of the room. It is completely pristine, like an architecture magazine. You see her bed, her desk, and her dresser.
+
+Look bed:
+Her bed is perfectly made. You are nervous to stand next to it for fear of messing it up by causing air currents.
+
+Look desk:
+Her desk is spotless and has nothing on it. You dare not change either of those facts. Under the desk is her trashcan.
+
+Look dresser:
+She would kill you if you went through those drawers. On top you see two meticulously folded towels.
+
+Take bed:
+It's attached to the wall, and your roommate's hands would be attached to your throat if you messed it up.
+
+Take desk:
+It's bolted to the floor, and what would you even do with it?
+
+Take dresser:
+It's bolted to the wall, and too heavy anyway.
+
+Use bed:
+It's as good a death bed as any, but I'd rather live.
+
+Use desk:
+There's nothing on it!
+
+Use dresser:
+I dare not.
+
+Look towel (or towels):
+They are perfectly folded and fluffy from the laundry.
+
+Use towel (or towels):
+You're completely dry, and also you don't want to be stabbed when she gets home.
+
+Take towel (or towels):
+You reach for the towels, then have a panic attack imagining what she will do to you when she gets home. Your poor heart cannot take it. GAME OVER
+
+Look trashcan:
+It is empty and strangely clean. It's almost asking to be filled.
+
+Use trashcan:
+I don't have any trash to put in it.
+
+Take trashcan:
+You grab the trashcan. Maybe you can do some cleaning up. [This adds flag TrashHeld.] 
+//add trashcan to inventory  
+
+[This is it for the roommate's area. With the trashcan, you can do more stuff on your side.]
+
+Go West:
+[Repeat the same description, but add that you can see the dresser if they have the Hydrated flag, both here and if they use "look" after they have it.]
+
+Use trashcan (TrashHeld): //if trash in inventory 
+Use it with what?
+
+Use trashcan with garbage pile (TrashHeld):
+It will surely collapse and kill me. If only there were a method to dismantle it safely... 
+[Set flag NeedMethod] //bool TrashCleared == F
+
+Use textbook (NeedMethod): 
+Use it with what?
+
+Use textbook with garbage pile (NeedMethod):
+Of course, practical application of your education! Using diagrams from the book, you devise a plan to dismantle the pile safely. [Clear NeedMethod, add HaveMethod]
+
+Use trashcan (HaveMethod): 
+Use it with what?
+
+Use trashcan with garbage pile (HaveMethod):
+You carefully dismantle the pile and place its contents into your roommate's trashcan. Underneath, you spot an old friend from bygone days: your shampoo! [Clear flag HaveMethod, add flag TrashGone]
+
+[Change all garbage pile commands to "The pile has been removed." with TrashGone.]
+
+Look shampoo:
+A half-full bottle of shampoo. It originally had matching conditioner after a particularly ambitious trip to the drug store, but you left it behind in the bathroom once and decided it was probably for the best.
+
+Use shampoo:
+With what, the water bottle?
+
+Use shampoo with water bottle:
+That was a joke.
+
+Take shampoo:
+You grab the shampoo triumphantly! [Add flag ShampooHeld.]
+
+[Now for the South door.]
+
+Go South (nothing):
+The hot water might wake you up, but your lack of anything to clean or dry yourself with does present an issue.
+
+Go South (TowelHeld, no ShampooHeld):
+You feel disgusting. You need more than just a rinse. You need a surfactant of some kind. And to burn the textbook that taught you that word, but one thing at a time.
+
+Go South (ShampooHeld, no TowelHeld):
+As deep as your craving for cleanliness is, drip-drying down the hallway is not a good way to make friends. Neither is slipping in your own puddle and breaking your neck, which is honestly the most likely scenario.
+
+Go South (TowelHeld and ShampooHeld):
+You journey into the great beyond. Once you are clean and dry, you can get to work on figuring out what day of the week it is!
