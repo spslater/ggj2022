@@ -2,74 +2,115 @@
 ---
 items:
   - &foo
-    color: red
     weight: 1
     desc: this foo is red and weighs 1
   - &bar
-    color: blue
     weight: 2
     desc: this bar is blue and weighs 2
 
   - &bed
     desc: >
       You promise it's only this messy because you just got up!
-    take: >
-      It's bolted to the wall.
-    take_chance: 0
-    use: >
-      It is still warm, and so comfy.
-      You guess you didn't have anything important to do anyway.
-    use_chance: 100
-    use_out: end
+    take:
+      desc: >
+        It's bolted to the wall.
+      chance: 0
+      outcome: null
+      require:
+        item: towel
+        status: hydrate
+    use:
+      desc: >
+        It is still warm, and so comfy.
+        You guess you didn't have anything important to do anyway.
+      chance: 1
+      outcome: end
 
-  - &garbage:
+  - &garbage
     alt: ["garbage pile"]
     desc: >
       The pile is only partially collapsed and remains precarious.
-    take: >
-      And what, put a giant pile of trash in my pocket?
+    take: 
+      desc: >
+        And what, put a giant pile of trash in my pocket?
+      chance: 1
+      outcome: null
 
-  - &desk:
+  - &desk
     desc: >
       Your desk, comparatively uncluttered but with a worn spot
       where you normally rest your head. You see your water bottle,
       a sandwich, and a mechanical engineering textbook.
       Below the desk is your trash can.
-    take: >
-      It's bolted to the floor.
+    take:
+      desc: >
+        It's bolted to the floor.
+      chance: 0
+      outcome: null
 
-  - &water:
+  - &water
     alt: ["water bottle", "bottle"]
     desc: >
       Your trusty water bottle. It is covered with anime stickers.
       You could probably remove the bottle,
       and the stickers would still be watertight.
-    take: >
-      Why would you want to keep that on your person in your own room?
+    take:
+      desc: >
+        Why would you want to keep that on your person in your own room?
+      chance: 0
+      outcome: hydrate
 
-  - &sandwich:
+  - &sandwich
     desc: >
       A sandwich of uncertain provenance. There are no visible signs of danger.
-    take: >
-      Doesn't really seem very handy to carry around.
+    take: 
+      desc: >
+        Doesn't really seem very handy to carry around.
+      chance: 1
+      outcome: take
 
-  - &textbook:
+  - &textbook
     alt: ["mechanical engineering textbook"]
     desc: >
       A super boring textbook/sedative combo.
       Contains various diagrams and techniques for structural and mechanical engineering.
-    take: >
-      But it's heavy!
+    take:
+      desc: >
+        But it's heavy!
+      chance: 0.5
+      outcome:
+        pass: take
+        fail: null
 
-  - &trashcan:
+  - &trashcan
     desc: >
       It is very full, ergo the garbage pile.
-    take: >
-      That sounds hazardous.
+    take:
+      desc: >
+        That sounds hazardous.
+      chance: 0
+      outcome: null
 
 
 
 rooms:
+  &bedroom bedroom:
+    desc: >
+      You are standing next to your bed.
+      You see your desk and the garbage pile.
+      To the East lies your roommate's area.
+      To the South lies the door to the hallway (and showers).
+    items:
+      bed: *bed
+      garbage: *garbage
+      desk: *desk
+      water: *water
+      sandwich: *sandwich
+      textbook: *textbook
+      trashcan: *trashcan
+
+
+
   &test test:
     desc: >
       You are standing next to your bed.
