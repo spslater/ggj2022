@@ -1,0 +1,109 @@
+# https://blog.daemonl.com/2016/02/yaml.html
+---
+items:
+  - &foo
+    color: red
+    weight: 1
+    desc: this foo is red and weighs 1
+  - &bar
+    color: blue
+    weight: 2
+    desc: this bar is blue and weighs 2
+
+  - &bed
+    desc: >
+      You promise it's only this messy because you just got up!
+    take: >
+      It's bolted to the wall.
+    take_chance: 0
+    use: >
+      It is still warm, and so comfy.
+      You guess you didn't have anything important to do anyway.
+    use_chance: 100
+    use_out: end
+
+  - &garbage:
+    alt: ["garbage pile"]
+    desc: >
+      The pile is only partially collapsed and remains precarious.
+    take: >
+      And what, put a giant pile of trash in my pocket?
+
+  - &desk:
+    desc: >
+      Your desk, comparatively uncluttered but with a worn spot
+      where you normally rest your head. You see your water bottle,
+      a sandwich, and a mechanical engineering textbook.
+      Below the desk is your trash can.
+    take: >
+      It's bolted to the floor.
+
+  - &water:
+    alt: ["water bottle", "bottle"]
+    desc: >
+      Your trusty water bottle. It is covered with anime stickers.
+      You could probably remove the bottle,
+      and the stickers would still be watertight.
+    take: >
+      Why would you want to keep that on your person in your own room?
+
+  - &sandwich:
+    desc: >
+      A sandwich of uncertain provenance. There are no visible signs of danger.
+    take: >
+      Doesn't really seem very handy to carry around.
+
+  - &textbook:
+    alt: ["mechanical engineering textbook"]
+    desc: >
+      A super boring textbook/sedative combo.
+      Contains various diagrams and techniques for structural and mechanical engineering.
+    take: >
+      But it's heavy!
+
+  - &trashcan:
+    desc: >
+      It is very full, ergo the garbage pile.
+    take: >
+      That sounds hazardous.
+
+
+
+rooms:
+  &test test:
+    desc: >
+      You are standing next to your bed.
+      You see your desk and the garbage pile.
+      To the East lies your roommate's area.
+      To the South lies the door to the hallway (and showers).
+    items:
+      foo: *foo
+      bar: *bar
+  &a asdf:
+    desc: |
+      this is embarasing, you see your roomate changing
+    items: {}
+  &b sdfg:
+    desc: |
+      woops, wrong bathroom
+    items: {}
+  &c dfgh:
+    desc: |
+      the kitchen is looking empty
+    items: {}
+
+start: *a
+finish: *test
+map:
+  *a:
+    s: *c
+    e: *b
+  *b:
+    s: *test
+    w: *a
+  *c:
+    n: *a
+    e: *test
+  *test:
+    n: *b
+    w: *c
