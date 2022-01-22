@@ -1,0 +1,15 @@
+# https://blog.daemonl.com/2016/02/yaml.html
+---
+foo: &full
+  <<: &anchor
+    K1: "One"
+  K2: "Two"
+
+bar:
+  <<: *anchor
+  K3: "Three"
+
+
+baz:
+  <<: *full
+  K3: "See"
