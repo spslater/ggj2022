@@ -40,7 +40,7 @@ class Action:
         for verb in self.verbs.values():
             if match := verb.pattern.match(res):
                 return verb.name, match.group("noun")
-        return None
+        return None, None
 
 
 class Map:
@@ -64,10 +64,12 @@ class Map:
 
 
 class Player:
-    def __init__(self, items=None, **kwargs):
+    def __init__(self, items=None, status=None, **kwargs):
         self.items = items or {}
+        self.status = status or {}
         self.location = None
-        self.status = {}
+        names = "|".join(kwargs.pop("inventory", ["self"]))
+        self.inventory = re.compile(r"(?P<verb>("+names+r"))\s*(?P<nouns>.*)?")
 
         for key, val in kwargs.items():
             setattr(self, key, val)
@@ -77,9 +79,19 @@ class Player:
         self.location.enter()
 
     def look(self, name):
-        if name == "self":
-            names = ", ".join(self.items.keys())
-            response(f"You look at the things you are carrying: {names}")
+        if match := self.inventory.match(name):
+            if item_name := match.group("nouns"):
+                if item := get_item(self.items, item_name):
+                    response(f"You look at {item_name}")
+                    if outcome := item.do("look"):
+                        debug(outcome)
+                    return
+                response(f"Sorry, there is no '{item_name}' in your inventory.")
+            elif items := self.items.keys():
+                names = ", ".join(items)
+                response(f"You look at the things you are carrying: {names}")
+            else:
+                response(f"You have no items right now.")
             return
         return self.location.look(name)
 
@@ -88,11 +100,12 @@ class Player:
         if item is None:
             response(f"No item named '{name}' to take")
             return None, None
-        name = item.name
-        if name in self.items:
-            self.items[name].quantity += 1
-        else:
-            self.items[name] = item
+        if outcome == "take":
+            name = item.name
+            if name in self.items:
+                self.items[name].quantity += 1
+            else:
+                self.items[name] = item
         return item, outcome
 
 
@@ -128,30 +141,32 @@ def gen_items(items):
     return gen
 
 
+def get_item(items, name):
+    for item in items.values():
+        if match := item.pattern.match(name):
+            return item
+    return None
+
+
 class Item:
     def __init__(self, name, **kwargs):
         self.name = name
         names = "|".join([name] + kwargs.get("alt", []))
         self.pattern = re.compile(r"(?P<item>(" + names + r"))")
         self.verbs = {
-            "look": None,
-            "take": None,
-            "use": None,
+            "look": ItemVerb(**kwargs.pop("look", {})),
+            "take": ItemVerb(**kwargs.pop("take", {})),
+            "use": ItemVerb(**kwargs.pop("use", {})),
         }
 
-        self.quantity = kwargs.get("quantity", 1)
-        if "quantity" in kwargs:
-            del kwargs["quantity"]
+        self.quantity = kwargs.pop("quantity", 1)
 
-        if look := kwargs.get("look"):
-            self.verbs["look"] = ItemVerb(**look)
-            del kwargs["look"]
-        if take := kwargs.get("take"):
-            self.verbs["take"] = ItemVerb(**take)
-            del kwargs["take"]
-        if use := kwargs.get("use"):
-            self.verbs["use"] = ItemVerb(**use)
-            del kwargs["use"]
+        # if look := kwargs.pop("look", None):
+        #     self.verbs["look"] = ItemVerb(**look)
+        # if take := kwargs.pop("take", None):
+        #     self.verbs["take"] = ItemVerb(**take)
+        # if use := kwargs.pop("use", None):
+        #     self.verbs["use"] = ItemVerb(**use)
 
         for key, val in kwargs.items():
             setattr(self, key, val)
@@ -191,24 +206,25 @@ class Room:
         response(self.desc)
         return self
 
-    def _get_item(self, name):
-        for item in self.items.values():
-            if match := item.pattern.match(name):
-                return item
-        return None
 
     def look(self, name):
-        if item := self._get_item(name):
+        if name == "around":
+            response("You look around the room again.")
+            response(self.desc)
+            return
+
+        if item := get_item(self.items, name):
             response(f"You look at {name}")
             if outcome := item.do("look"):
                 debug(outcome)
-        else:
-            response(f"Sorry, there is no item with the name '{name}' in the room.")
+            return
+        response(f"Sorry, there is no item with the name '{name}' in the room.")
+        return
 
     def take(self, name):
         val = None
         outcome = None
-        if item := self._get_item(name):
+        if item := get_item(self.items, name):
             outcome = item.do("take")
             val = deepcopy(item)
             if item.quantity > 1:
@@ -226,7 +242,7 @@ class Room:
             self.items[name] = item
 
 
-player = Player()
+player = Player(**config["player"])
 worldmap = Map(
     config["rooms"],
     config["start"],

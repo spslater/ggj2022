@@ -286,3 +286,9 @@ verbs:
   use: []
   move: ["go"]
   quit: ["q"]
+
+player:
+  status:
+    hydrate: false
+    tired: true
+  inventory: ["self", "me", "inventory", "inv"]
