@@ -133,17 +133,17 @@ rooms:
       the kitchen is looking empty
     items: {}
 
-start: *a
+start: *bedroom
 finish: *test
 map:
-  *a:
+  *bedroom:
     s: *c
     e: *b
   *b:
     s: *test
-    w: *a
+    w: *bedroom
   *c:
-    n: *a
+    n: *bedroom
     e: *test
   *test:
     n: *b

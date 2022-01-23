@@ -1,14 +1,42 @@
+import re
 import readline
 import shlex
 import yaml
-from pprint import pprint
 
 with open("test.yml") as fp:
     config = yaml.load(fp, Loader=yaml.FullLoader)
 
+def response(*args, **kwargs):
+    print("> ", *args, **kwargs)
 
-def act(prompt):
-    return shlex.split(input(prompt))
+def debug(*args, **kwargs):
+    print("? ", *args, **kwargs)
+
+class Act:
+    def __init__(self, primary, synonyms, **kwargs):
+        self.name = primary
+        acts = "|".join([primary] + synonyms)
+        self.pattern = re.compile(r"(?P<verb>(" + acts + r"))\s*(?P<noun>.*)?")
+
+        for key, val in kwargs.items():
+            setattr(self, key, val)
+
+
+class Action:
+    def __init__(self, verbs, **kwargs):
+        self.verbs = {}
+        for verb, synonyms in verbs.items():
+            self.verbs[verb] = Act(verb, synonyms)
+
+        for key, val in kwargs.items():
+            setattr(self, key, val)
+
+    def do(self, prompt):
+        res = input(prompt)
+        for verb in self.verbs.values():
+            if match := verb.pattern.match(res):
+                return verb.name, match.group("noun")
+        return None
 
 
 class Map:
@@ -47,7 +75,7 @@ class Player:
     def take(self, name):
         item = self.location.give(name)
         if item is None:
-            print(f"No item named '{name}' to take")
+            response(f"No item named '{name}' to take")
             return
         name = item.name
         if name in self.items:
@@ -75,14 +103,14 @@ def gen_items(items):
 class Item:
     def __init__(self, name, **kwargs):
         self.name = name
-        self.weight = weight
-        self.desc = desc
+        names = "|".join([name] + kwargs.get("alt", []))
+        self.pattern = re.compile(r"(?P<item>("+names+r"))")
 
         for key, val in kwargs.items():
             setattr(self, key, val)
 
     def look(self):
-        print(self.desc)
+        response(self.desc)
 
     def use(self):
         pass
@@ -114,16 +142,17 @@ class Room:
             setattr(self, key, val)
 
     def enter(self):
-        print(f"You have entered {self.name}.")
-        print(self.desc)
+        response(f"You have entered {self.name}.")
+        response(self.desc)
         return self
 
     def look(self, name):
-        if name in self.items:
-            print(f"You look at {name}")
-            self.items[name].look()
-        else:
-            print("Sorry, there is no item with that name in the room.")
+        for item in self.items.values():
+            if match := item.pattern.match(name):
+                response(f"You look at {name}")
+                item.look()
+                return
+        response(f"Sorry, there is no item with the name '{name}' in the room.")
 
     def take(self, item):
         name = item.name
@@ -153,17 +182,56 @@ worldmap = Map(config["rooms"], config["start"], config["finish"], config["map"]
 
 player.location = worldmap.get_room(worldmap.start)
 
+acts = Action(config["verbs"])
+
+
+def move(noun):
+    room = worldmap.move(player.location, noun)
+    if room:
+        player.move(room)
+    else:
+        response("no room in that direction")
+
+
+def look(noun):
+    room = player.location
+    room.look(noun)
+
+
+def use(noun):
+    debug(f"useing at '{noun}'")
+
+
+def take(noun):
+    debug(f"taking at '{noun}'")
+
 
 def run():
     while True:
-        res = act("Direction? ")
-        if res[0] in ("quit", "q"):
+        verb, noun = acts.do("Action? ")
+        if verb is None:
+            response("sorry, i do know that command")
+            continue
+
+        if verb == "quit":
+            response("thanks for playing!")
             break
-        room = worldmap.move(player.location, res[0])
-        if room:
-            player.move(room)
-        else:
-            print("no room in that direction")
+
+        if verb == "move":
+            move(noun)
+            continue
+
+        if verb == "look":
+            look(noun)
+            continue
+
+        if verb == "use":
+            use(noun)
+            continue
+
+        if verb == "take":
+            take(noun)
+            continue
 
 
 run()
