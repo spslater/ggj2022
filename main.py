@@ -2,15 +2,19 @@ import re
 import readline
 import shlex
 import yaml
+from copy import deepcopy
 
 with open("test.yml") as fp:
     config = yaml.load(fp, Loader=yaml.FullLoader)
 
+
 def response(*args, **kwargs):
     print("> ", *args, **kwargs)
 
+
 def debug(*args, **kwargs):
     print("? ", *args, **kwargs)
+
 
 class Act:
     def __init__(self, primary, synonyms, **kwargs):
@@ -72,29 +76,53 @@ class Player:
         self.location = room
         self.location.enter()
 
+    def look(self, name):
+        if name == "self":
+            names = ", ".join(self.items.keys())
+            response(f"You look at the things you are carrying: {names}")
+            return
+        return self.location.look(name)
+
     def take(self, name):
-        item = self.location.give(name)
+        item, outcome = self.location.take(name)
         if item is None:
             response(f"No item named '{name}' to take")
-            return
+            return None, None
         name = item.name
         if name in self.items:
-            val = self.items[name]
-            if not isinstance(val, list):
-                self.items[name] = [val]
-            self.items[name].append(item)
+            self.items[name].quantity += 1
         else:
             self.items[name] = item
+        return item, outcome
+
+
+class ItemVerb:
+    def __init__(
+        self,
+        desc="",
+        chance=1,
+        require=None,
+        succ=None,
+        fail=None,
+        outcome=None,
+    ):
+        self.desc = desc
+        self.chanse = chance
+        self.require = require
+        self.succ = succ or {}
+        self.fail = fail or {}
+
+    def do(self):
+        if self.chanse:
+            return self.succ.get("desc"), self.succ.get("outcome")
+        return self.fail.get("desc"), self.fail.get("outcome")
 
 
 def gen_items(items):
     gen = {}
     for name, item in items.items():
         if name in gen:
-            val = gen[name]
-            if not isinstance(val, list):
-                gen[name] = [val]
-            gen[name].append(item)
+            gen[name].quantity += 1
         else:
             gen[name] = Item(name=name, **item)
     return gen
@@ -104,19 +132,36 @@ class Item:
     def __init__(self, name, **kwargs):
         self.name = name
         names = "|".join([name] + kwargs.get("alt", []))
-        self.pattern = re.compile(r"(?P<item>("+names+r"))")
+        self.pattern = re.compile(r"(?P<item>(" + names + r"))")
+        self.verbs = {
+            "look": None,
+            "take": None,
+            "use": None,
+        }
+
+        self.quantity = kwargs.get("quantity", 1)
+        if "quantity" in kwargs:
+            del kwargs["quantity"]
+
+        if look := kwargs.get("look"):
+            self.verbs["look"] = ItemVerb(**look)
+            del kwargs["look"]
+        if take := kwargs.get("take"):
+            self.verbs["take"] = ItemVerb(**take)
+            del kwargs["take"]
+        if use := kwargs.get("use"):
+            self.verbs["use"] = ItemVerb(**use)
+            del kwargs["use"]
 
         for key, val in kwargs.items():
             setattr(self, key, val)
 
-    def look(self):
-        response(self.desc)
-
-    def use(self):
-        pass
-
-    def consume(self):
-        pass
+    def do(self, act):
+        if verb := self.verbs.get(act):
+            desc, outcome = verb.do()
+            response(desc)
+            return outcome
+        return None
 
 
 def gen_rooms(rooms):
@@ -146,67 +191,54 @@ class Room:
         response(self.desc)
         return self
 
-    def look(self, name):
+    def _get_item(self, name):
         for item in self.items.values():
             if match := item.pattern.match(name):
-                response(f"You look at {name}")
-                item.look()
-                return
-        response(f"Sorry, there is no item with the name '{name}' in the room.")
+                return item
+        return None
 
-    def take(self, item):
+    def look(self, name):
+        if item := self._get_item(name):
+            response(f"You look at {name}")
+            if outcome := item.do("look"):
+                debug(outcome)
+        else:
+            response(f"Sorry, there is no item with the name '{name}' in the room.")
+
+    def take(self, name):
+        val = None
+        outcome = None
+        if item := self._get_item(name):
+            outcome = item.do("take")
+            val = deepcopy(item)
+            if item.quantity > 1:
+                item.quantity -= 1
+                val.quantity = 1
+            elif item.quantity == 1:
+                del self.items[item.name]
+        return val, outcome
+
+    def give(self, name):
         name = item.name
         if name in self.items:
-            val = self.items[name]
-            if not isinstance(val, list):
-                self.items[name] = [val]
             self.items[name].append(item)
         else:
             self.items[name] = item
 
-    def give(self, name):
-        if name not in self.items:
-            return None
-
-        val = self.items[name]
-        if not isinstance(val, list):
-            del self.items[name]
-            return val
-
-        val = self.items[name].pop()
-        return val
-
 
 player = Player()
-worldmap = Map(config["rooms"], config["start"], config["finish"], config["map"])
-
-player.location = worldmap.get_room(worldmap.start)
-
+worldmap = Map(
+    config["rooms"],
+    config["start"],
+    config["finish"],
+    config["map"],
+)
 acts = Action(config["verbs"])
-
-
-def move(noun):
-    room = worldmap.move(player.location, noun)
-    if room:
-        player.move(room)
-    else:
-        response("no room in that direction")
-
-
-def look(noun):
-    room = player.location
-    room.look(noun)
-
-
-def use(noun):
-    debug(f"useing at '{noun}'")
-
-
-def take(noun):
-    debug(f"taking at '{noun}'")
+player.location = worldmap.get_room(worldmap.start)
 
 
 def run():
+    response(config["intro"])
     while True:
         verb, noun = acts.do("Action? ")
         if verb is None:
@@ -218,19 +250,23 @@ def run():
             break
 
         if verb == "move":
-            move(noun)
+            room = worldmap.move(player.location, noun)
+            if room:
+                player.move(room)
+            else:
+                response("no room in that direction")
             continue
 
         if verb == "look":
-            look(noun)
-            continue
-
-        if verb == "use":
-            use(noun)
+            player.look(noun)
             continue
 
         if verb == "take":
-            take(noun)
+            item, outcome = player.take(noun)
+            continue
+
+        if verb == "use":
+            debug(f"using at '{noun}'")
             continue
 
 
