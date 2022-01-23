@@ -3,7 +3,7 @@ from .player import Player
 from .room import Map
 from .verb import Action
 
-config = load_config("../test.yml")
+config = load_config("test.yml")
 
 player = Player(**config["player"])
 worldmap = Map(
