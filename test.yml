@@ -1,5 +1,13 @@
 # https://blog.daemonl.com/2016/02/yaml.html
 ---
+intro:
+  desc: >
+  You awaken in your dorm room to the clarion sound of your haphazard tower of styrofoam noodle cups and pizza boxes collapsing. 
+  There is no apparent cause, so presumably structural fatigue. 
+  Your roommate is nowhere to be seen. 
+  You are tired and have a headache. 
+  You need a shower.
+
 items:
   - &foo
     weight: 1
@@ -27,7 +35,7 @@ items:
       outcome: end
 
   - &garbage
-    alt: ["garbage pile"]
+    alt: ["garbage pile", "pile", "trash"]
     desc: >
       The pile is only partially collapsed and remains precarious.
     take: 
@@ -148,3 +156,9 @@ map:
   *test:
     n: *b
     w: *c
+
+verbs:
+  take: ["fetch", "grab"]
+  look: ["look at"]
+  use: []
+  move: ["go"]
