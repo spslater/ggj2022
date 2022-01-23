@@ -43,6 +43,9 @@ items:
         And what, put a giant pile of trash in my pocket?
       chance: 1
       outcome: null
+    use:
+      desc: >
+        For what, exactly?
 
   - &desk
     desc: >
@@ -55,27 +58,59 @@ items:
         It's bolted to the floor.
       chance: 0
       outcome: null
+    use:
+      desc: >
+        The bed is comfier.
 
   - &water
     alt: ["water bottle", "bottle"]
-    desc: >
-      Your trusty water bottle. It is covered with anime stickers.
-      You could probably remove the bottle,
-      and the stickers would still be watertight.
+    look:
+      chance: 1
+      require: hydrate
+      fail:
+        desc: >
+          Your trusty water bottle. It is covered with anime stickers.
+          You could probably remove the bottle, and the stickers would still be watertight.
+        action: null
+      pass: 
+        desc: That Megumin sticker is cute.
+        action: null
     take:
-      desc: >
-        Why would you want to keep that on your person in your own room?
       chance: 0
-      outcome: hydrate
+      required: null
+      fail: 
+        desc: >
+          Why would you want to keep that on your person in your own room?
+        action: null
+      pass:
+        desc: ""
+        action: null
+    use:
+      chance: 1
+      required: hydrate
+      fail: 
+        desc: >
+          You take a long pull of lukewarm water. 
+          You must have been dehydrated because your headache dissipates and your head clears. You remember that you have a dresser!
+        action: hydrate
+      pass:
+        desc: >
+          You are no longer thirsty. That Megumin sticker is cute, though
+        action: null
 
   - &sandwich
     desc: >
       A sandwich of uncertain provenance. There are no visible signs of danger.
-    take: 
+    take:
       desc: >
         Doesn't really seem very handy to carry around.
-      chance: 1
+      chance: 0
       outcome: take
+    use:
+      chance: 1
+      desc: >
+        You take a big bite and immediately realize that not all dangers are visible. Without even getting a chance to swallow, you are doomed.
+      outcome: end
 
   - &textbook
     alt: ["mechanical engineering textbook"]
@@ -88,7 +123,9 @@ items:
       chance: 0.5
       outcome:
         pass: take
-        fail: null
+    use:
+      desc: >
+        Against all odds, you already finished that homework. Strictly speaking.
 
   - &trashcan
     desc: >
@@ -97,9 +134,48 @@ items:
       desc: >
         That sounds hazardous.
       chance: 0
-      outcome: null
+    use:
+      desc: That ship has sailed.
 
-
+  - &dresser
+      look:
+        chance: 1
+        require: hydrate
+        fail:
+          desc: What dresser?
+        pass: 
+          desc: A utilitarian dorm dresser, attached to the wall.
+      take:
+        chance: 1
+        required: hydrate
+        fail: 
+          desc: What dresser?
+        pass:
+          desc: It's literally attached to the wall.
+      use:
+        chance: 1
+        required: hydrate
+        fail: 
+          desc: What dresser?
+        pass:
+          desc: >
+            Searching through the dresser's mostly barren drawers (standing on the rug made of dirty laundry in front of it), you find a phenomenal treasure: a clean towel!
+          action: reveal towel
+  - &towel
+      look:
+        chance: 1
+        pass:
+          desc: A pristine, possibly never-used cheap blue towel from Target.
+      take:
+        chance: 1
+        pass:
+          desc: You drape the towel over your neck. Towel acquired!
+          action: [take]
+      use:
+        chance: 1
+        pass:
+          desc: >
+            You're perfectly dry.
 
 rooms:
   &bedroom bedroom:
@@ -116,8 +192,86 @@ rooms:
       sandwich: *sandwich
       textbook: *textbook
       trashcan: *trashcan
+      towel: 
+        <<: *towel
+        hidden: true
+  &roommate roommate:
+    enter: You walk over to your roommate's area of the room.
+    desc: It is completely pristine, like an architecture magazine. You see her bed, her desk, and her dresser.
+    items:
+      bed: 
+        <<: *bed
+        look:
+          chance: 1
+          desc: >
+            Her bed is perfectly made. You are nervous to stand next to it for fear of messing it up by causing air currents.
+        take:
+          chance: 0
+          desc: >
+            It's attached to the wall, and your roommate's hands would be attached to your throat if you messed it up.
+        use:
+          chance: 0
+          fail:
+            desc: It's as good a death bed as any, but I'd rather live.
 
-
+      desk: 
+        <<: *desk
+        look:
+          chance: 1
+          desc: >
+            Her desk is spotless and has nothing on it.
+            You dare not change either of those facts.
+            Under the desk is her trashcan.
+          outcome: reveal trashcan
+        take:
+          chance: 0
+          fail: 
+            desc: >
+              It's bolted to the floor, and what would you even do with it?
+        use:
+          chance: 0
+          fail:
+            desc: There's nothing on it!
+      trashcan:
+        <<: *trashcan
+        hidden: true
+        look:
+          chance:
+          desc:
+        take:
+          chance:
+          desc:
+        use:
+          chance:
+          desc:www
+      dresser: 
+        <<: *dresser
+        look:
+          chance: 1
+          desc: >
+            She would kill you if you went through those drawers. On top you see two meticulously folded towels.
+          outcome: reveal towels
+        take:
+          chance: 0
+          fail: 
+            desc: It's bolted to the wall, and too heavy anyway.
+        use:
+          chance:
+          desc:
+      towels:
+        <<: *towel
+        look: 
+          chance: 1
+          desc: They are perfectly folded and fluffy from the laundry.
+        take:
+          chance: 1
+          desc: >
+            Take towel (or towels):
+            You reach for the towels, then have a panic attack imagining what she will do to you when she gets home. Your poor heart cannot take it.
+          outcome: end
+        use:
+          chance:
+          desc:
 
   &test test:
     desc: >
@@ -158,7 +312,8 @@ map:
     w: *c
 
 verbs:
-  take: ["fetch", "grab"]
   look: ["look at"]
+  take: ["fetch", "grab"]
   use: []
   move: ["go"]
+  quit: ["q"]
