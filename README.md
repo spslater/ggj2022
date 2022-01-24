@@ -23,7 +23,7 @@ Make sure that each scripted command only works if you're in the correct room!
 * pick up things
   * probably with synonyms pick up, take, grab, etc
   * "inventory" command to show what they currently are holding.
-
+  * you are already holding the {X} if item is already in inventory.
 * move
   * with synonyms go, move, walk etc.
 

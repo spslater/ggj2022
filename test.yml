@@ -1,181 +1,212 @@
 # https://blog.daemonl.com/2016/02/yaml.html
 ---
-intro:
-  desc: >
-  You awaken in your dorm room to the clarion sound of your haphazard tower of styrofoam noodle cups and pizza boxes collapsing. 
-  There is no apparent cause, so presumably structural fatigue. 
-  Your roommate is nowhere to be seen. 
-  You are tired and have a headache. 
+intro: >
+  You awaken in your dorm room to the clarion sound of your haphazard tower of styrofoam noodle cups and pizza boxes collapsing.
+  There is no apparent cause, so presumably structural fatigue.
+  Your roommate is nowhere to be seen.
+  You are tired and have a headache.
   You need a shower.
 
-items:
-  - &foo
-    weight: 1
-    desc: this foo is red and weighs 1
-  - &bar
-    weight: 2
-    desc: this bar is blue and weighs 2
-
-  - &bed
-    desc: >
-      You promise it's only this messy because you just got up!
-    take:
-      desc: >
-        It's bolted to the wall.
-      chance: 0
-      outcome: null
+templates:
+  - &itemtemplate
+    alt:
+    look:
       require:
-        item: towel
-        status: hydrate
+      chance:
+      fail:
+        desc:
+        outcome:
+      succ:
+        desc:
+        outcome:
+    take:
+      require:
+      chance:
+      fail:
+        desc:
+        outcome:
+      succ:
+        desc:
+        outcome:
     use:
-      desc: >
-        It is still warm, and so comfy.
-        You guess you didn't have anything important to do anyway.
+      require:
+      chance:
+      fail:
+        desc:
+        outcome:
+      succ:
+        desc:
+        outcome:
+
+items:
+  - &bed
+    look:
       chance: 1
-      outcome: end
+      succ:
+        desc: >
+          You promise it's only this messy because you just got up!
+    take:
+      chance: 0
+      fail:
+        desc: It's bolted to the wall.
+    use:
+      chance: 1
+      succ:
+        desc: >
+          It is still warm, and so comfy.
+          You guess you didn't have anything important to do anyway.
+        outcome: ["end"]
 
   - &garbage
     alt: ["garbage pile", "pile", "trash"]
-    desc: >
-      The pile is only partially collapsed and remains precarious.
-    take: 
-      desc: >
-        And what, put a giant pile of trash in my pocket?
+    look:
       chance: 1
-      outcome: null
+      succ:
+        desc: The pile is only partially collapsed and remains precarious.
+    take:
+      chance: 1
+      succ:
+        desc: And what, put a giant pile of trash in my pocket?
     use:
-      desc: >
-        For what, exactly?
+      chance: 0
+      fail:
+        desc: For what, exactly?
 
   - &desk
-    desc: >
-      Your desk, comparatively uncluttered but with a worn spot
-      where you normally rest your head. You see your water bottle,
-      a sandwich, and a mechanical engineering textbook.
-      Below the desk is your trash can.
+    look:
+      chance: 1
+      succ:
+        desc: >
+          Your desk, comparatively uncluttered but with a worn spot
+          where you normally rest your head. You see your water bottle,
+          a sandwich, and a mechanical engineering textbook.
+          Below the desk is your trash can.
     take:
-      desc: >
-        It's bolted to the floor.
       chance: 0
-      outcome: null
+      fail:
+        desc: It's bolted to the floor.
     use:
-      desc: >
-        The bed is comfier.
+      chance: 0
+      fail:
+        desc: The bed is comfier.
 
   - &water
     alt: ["water bottle", "bottle"]
     look:
+      require: ["status", "hydrate"]
       chance: 1
-      require: hydrate
       fail:
         desc: >
           Your trusty water bottle. It is covered with anime stickers.
           You could probably remove the bottle, and the stickers would still be watertight.
-        action: null
-      pass: 
+      succ:
         desc: That Megumin sticker is cute.
-        action: null
     take:
       chance: 0
-      required: null
-      fail: 
-        desc: >
-          Why would you want to keep that on your person in your own room?
-        action: null
-      pass:
-        desc: ""
-        action: null
+      fail:
+        desc: Why would you want to keep that on your person in your own room?
     use:
+      require: ["status", "hydrate"]
       chance: 1
-      required: hydrate
-      fail: 
+      fail:
         desc: >
-          You take a long pull of lukewarm water. 
-          You must have been dehydrated because your headache dissipates and your head clears. You remember that you have a dresser!
-        action: hydrate
-      pass:
-        desc: >
-          You are no longer thirsty. That Megumin sticker is cute, though
-        action: null
+          You take a long pull of lukewarm water.
+          You must have been dehydrated because
+          your headache dissipates and your head clears.
+          You remember that you have a dresser!
+      succ:
+        desc: You are no longer thirsty. That Megumin sticker is cute, though
+        action: ["status", "hydrate"]
 
   - &sandwich
-    desc: >
-      A sandwich of uncertain provenance. There are no visible signs of danger.
+    look:
+      chance: 1
+      succ:
+        desc: A sandwich of uncertain provenance. There are no visible signs of danger.
     take:
-      desc: >
-        Doesn't really seem very handy to carry around.
       chance: 0
-      outcome: take
+      fail:
+        desc: Doesn't really seem very handy to carry around.
     use:
       chance: 1
-      desc: >
-        You take a big bite and immediately realize that not all dangers are visible. Without even getting a chance to swallow, you are doomed.
-      outcome: end
+      succ:
+        desc: >
+          You take a big bite and immediately realize that not all dangers are visible.
+          Without even getting a chance to swallow, you are doomed.
+        outcome: ["end"]
 
   - &textbook
     alt: ["mechanical engineering textbook"]
-    desc: >
-      A super boring textbook/sedative combo.
-      Contains various diagrams and techniques for structural and mechanical engineering.
+    look:
+      chance: 1
+      succ:
+        desc: >
+          A super boring textbook/sedative combo.
+          Contains various diagrams and techniques for structural and mechanical engineering.
     take:
-      desc: >
-        But it's heavy!
-      chance: 0.5
-      outcome:
-        pass: take
+      chance: 1
+      succ:
+        desc: But it's heavy!
+        outcome: ["take"]
     use:
-      desc: >
-        Against all odds, you already finished that homework. Strictly speaking.
+      chance: 1
+      succ:
+        desc: Against all odds, you already finished that homework. Strictly speaking.
 
   - &trashcan
-    desc: >
-      It is very full, ergo the garbage pile.
+    look:
+      chance: 1
+      succ:
+        desc: It is very full, ergo the garbage pile.
     take:
-      desc: >
-        That sounds hazardous.
       chance: 0
+      fail:
+        desc: That sounds hazardous.
     use:
-      desc: That ship has sailed.
+      chance: 0
+      fail:
+        desc: That ship has sailed.
 
   - &dresser
       look:
+        require: ["status", "hydrate"]
         chance: 1
-        require: hydrate
         fail:
           desc: What dresser?
-        pass: 
+        succ:
           desc: A utilitarian dorm dresser, attached to the wall.
       take:
+        require: ["status", "hydrate"]
         chance: 1
-        required: hydrate
-        fail: 
+        fail:
           desc: What dresser?
-        pass:
+        succ:
           desc: It's literally attached to the wall.
       use:
+        require: ["status", "hydrate"]
         chance: 1
-        required: hydrate
-        fail: 
+        fail:
           desc: What dresser?
-        pass:
+        succ:
           desc: >
-            Searching through the dresser's mostly barren drawers (standing on the rug made of dirty laundry in front of it), you find a phenomenal treasure: a clean towel!
+            Searching through the dresser's mostly barren drawers
+            (standing on the rug made of dirty laundry in front of it),
+            you find a phenomenal treasure: a clean towel!
           action: reveal towel
   - &towel
       look:
         chance: 1
-        pass:
+        succ:
           desc: A pristine, possibly never-used cheap blue towel from Target.
       take:
         chance: 1
-        pass:
+        succ:
           desc: You drape the towel over your neck. Towel acquired!
-          action: [take]
+          action: ["take"]
       use:
         chance: 1
-        pass:
-          desc: >
-            You're perfectly dry.
+        succ:
+          desc: You're perfectly dry.
 
 rooms:
   &bedroom bedroom:
@@ -192,40 +223,47 @@ rooms:
       sandwich: *sandwich
       textbook: *textbook
       trashcan: *trashcan
-      towel: 
+      towel:
         <<: *towel
         hidden: true
   &roommate roommate:
     enter: You walk over to your roommate's area of the room.
-    desc: It is completely pristine, like an architecture magazine. You see her bed, her desk, and her dresser.
+    desc: >
+      It is completely pristine, like an architecture magazine.
+      You see her bed, her desk, and her dresser.
     items:
-      bed: 
+      bed:
         <<: *bed
         look:
           chance: 1
-          desc: >
-            Her bed is perfectly made. You are nervous to stand next to it for fear of messing it up by causing air currents.
+          succ:
+            desc: >
+              Her bed is perfectly made. You are nervous to stand next to
+              it for fear of messing it up by causing air currents.
         take:
           chance: 0
-          desc: >
-            It's attached to the wall, and your roommate's hands would be attached to your throat if you messed it up.
+          fail:
+            desc: >
+              It's attached to the wall, and your roommate's hands would be
+              attached to your throat if you messed it up.
         use:
           chance: 0
           fail:
             desc: It's as good a death bed as any, but I'd rather live.
 
-      desk: 
+      desk:
         <<: *desk
         look:
           chance: 1
-          desc: >
-            Her desk is spotless and has nothing on it.
-            You dare not change either of those facts.
-            Under the desk is her trashcan.
-          outcome: reveal trashcan
+          succ:
+            desc: >
+              Her desk is spotless and has nothing on it.
+              You dare not change either of those facts.
+              Under the desk is her trashcan.
+            outcome: ["reveal", "trashcan"]
         take:
           chance: 0
-          fail: 
+          fail:
             desc: >
               It's bolted to the floor, and what would you even do with it?
         use:
@@ -237,26 +275,30 @@ rooms:
         hidden: true
         look:
           chance: 1
-          desc: >
-            It is empty and strangely clean. It's almost asking to be filled.
+          succ:
+            desc: >
+              It is empty and strangely clean. It's almost asking to be filled.
         take:
           chance: 1
-          desc: >
-            You grab the trashcan. Maybe you can do some cleaning up.
-          outcome: [take]
+          succ:
+            desc: >
+              You grab the trashcan. Maybe you can do some cleaning up.
         use:
-          chance:
-          desc: www
+          chance: 0
+          fail:
+            desc: Use it with what?
       dresser: 
         <<: *dresser
         look:
           chance: 1
-          desc: >
-            She would kill you if you went through those drawers. On top you see two meticulously folded towels.
-          outcome: reveal towels
+          succ:
+            desc: >
+              She would kill you if you went through those drawers.
+              On top you see two meticulously folded towels.
+            outcome: ["reveal", "towels"]
         take:
           chance: 0
-          fail: 
+          fail:
             desc: It's bolted to the wall, and too heavy anyway.
         use:
           chance: 0
@@ -267,55 +309,25 @@ rooms:
         alt: [towel]
         look: 
           chance: 1
-          desc: They are perfectly folded and fluffy from the laundry.
+          succ:
+            desc: They are perfectly folded and fluffy from the laundry.
         take:
           chance: 1
-          desc: >
-            Take towel (or towels):
-            You reach for the towels, then have a panic attack imagining what she will do to you when she gets home. Your poor heart cannot take it.
-          outcome: end
-        use:
-          chance: 0
-          fail:
-            desc: You're completely dry, and also you don't want to be stabbed when she gets home.
+          succ:
+            desc: >
+              Take towel (or towels):
+              You reach for the towels, then have a panic attack imagining what she
+              will do to you when she gets home. Your poor heart cannot take it.
+            outcome: ["end"]
+        use: {}
 
-  &test test:
-    desc: >
-      You are standing next to your bed.
-      You see your desk and the garbage pile.
-      To the East lies your roommate's area.
-      To the South lies the door to the hallway (and showers).
-    items:
-      foo: *foo
-      bar: *bar
-  &a asdf:
-    desc: |
-      this is embarasing, you see your roomate changing
-    items: {}
-  &b sdfg:
-    desc: |
-      woops, wrong bathroom
-    items: {}
-  &c dfgh:
-    desc: |
-      the kitchen is looking empty
-    items: {}
-
-start: *a
-finish: *test
+start: *bedroom
+finish: *roommate
 map:
-  *a:
-    s: *c
-    e: *b
-  *b:
-    s: *test
-    w: *a
-  *c:
-    n: *a
-    e: *test
-  *test:
-    n: *b
-    w: *c
+  *bedroom:
+    e: *roommate
+  *roommate:
+    w: *bedroom
 
 verbs:
   look: ["look at"]
@@ -323,3 +335,9 @@ verbs:
   use: []
   move: ["go"]
   quit: ["q"]
+
+player:
+  status:
+    hydrate: false
+    tired: true
+  inventory: ["self", "me", "inventory", "inv"]
