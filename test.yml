@@ -304,8 +304,8 @@ rooms:
             desc: It's bolted to the wall, and too heavy anyway.
         use:
           chance: 0
-            fail:
-              desc: I dare not.
+          fail:
+            desc: I dare not.
       towels:
         <<: *towel
         alt: [towel]
