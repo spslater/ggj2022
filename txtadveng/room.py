@@ -6,9 +6,8 @@ from .item import gen_items, get_item
 
 
 class Map:
-    def __init__(self, rooms, start, finish, graph, **kwargs):
+    def __init__(self, rooms, start, graph, **kwargs):
         self.start = start
-        self.finish = finish
         self.graph = graph
         self.rooms = gen_rooms(rooms)
 
@@ -53,7 +52,16 @@ class Room:
     def enter(self):
         """enter a room and display description text"""
         response(f"You have entered {self.name}.")
-        response(self.desc)
+        if enter_txt := self.desc.get("enter"):
+            response(enter_txt)
+        if look_txt := self.desc.get("look"):
+            response(look_txt)
+        return self
+
+    def exit(self):
+        """exit a room"""
+        if exit_txt := self.desc.get("exit"):
+            response(exit_txt)
         return self
 
     def look(self, name):
@@ -65,7 +73,7 @@ class Room:
 
         if item := get_item(self.items, name):
             response(f"You look at {name}")
-            if outcome := item.do("look"):
+            if outcome := item("look"):
                 debug(outcome)
             return
         response(f"Sorry, there is no item with the name '{name}' in the room.")
@@ -76,7 +84,7 @@ class Room:
         val = None
         outcome = None
         if item := get_item(self.items, name):
-            outcome = item.do("take")
+            outcome = item("take")
             val = deepcopy(item)
             if item.quantity > 1:
                 item.quantity -= 1

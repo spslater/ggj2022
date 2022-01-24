@@ -9,12 +9,17 @@ class Player:
     def __init__(self, items=None, status=None, **kwargs):
         self.items = items or {}
         self.status = status or {}
+        self.worldmap = None
         self.location = None
-        names = "|".join(kwargs.pop("inventory", ["self"]))
-        self.inventory = re.compile(r"(?P<verb>(" + names + r"))\s*(?P<nouns>.*)?")
 
         for key, val in kwargs.items():
             setattr(self, key, val)
+
+    def loadmap(self, worldmap):
+        """save worldmap and set starting location"""
+        self.worldmap = worldmap
+        start = self.worldmap.start
+        self.location = self.worldmap.get_room(start)
 
     def move(self, room):
         """move to a new room"""
@@ -27,7 +32,7 @@ class Player:
             if item_name := match.group("nouns"):
                 if item := get_item(self.items, item_name):
                     response(f"You look at {item_name}")
-                    if outcome := item.do("look"):
+                    if outcome := item(self, "look"):
                         debug(outcome)
                     return None
                 response(f"Sorry, there is no '{item_name}' in your inventory.")
