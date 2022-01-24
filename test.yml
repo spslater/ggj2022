@@ -7,6 +7,37 @@ intro: >
   You are tired and have a headache.
   You need a shower.
 
+templates:
+  - &itemtemplate
+    alt:
+    look:
+      require:
+      chance:
+      fail:
+        desc:
+        outcome:
+      succ:
+        desc:
+        outcome:
+    take:
+      require:
+      chance:
+      fail:
+        desc:
+        outcome:
+      succ:
+        desc:
+        outcome:
+    use:
+      require:
+      chance:
+      fail:
+        desc:
+        outcome:
+      succ:
+        desc:
+        outcome:
+
 items:
   - &bed
     look:
@@ -62,8 +93,8 @@ items:
   - &water
     alt: ["water bottle", "bottle"]
     look:
-      chance: 1
       require: ["status", "hydrate"]
+      chance: 1
       fail:
         desc: >
           Your trusty water bottle. It is covered with anime stickers.
@@ -73,11 +104,10 @@ items:
     take:
       chance: 0
       fail:
-        desc: >
-          Why would you want to keep that on your person in your own room?
+        desc: Why would you want to keep that on your person in your own room?
     use:
-      chance: 1
       require: ["status", "hydrate"]
+      chance: 1
       fail:
         desc: >
           You take a long pull of lukewarm water.
@@ -85,67 +115,76 @@ items:
           your headache dissipates and your head clears.
           You remember that you have a dresser!
       succ:
-        desc: >
-          You are no longer thirsty. That Megumin sticker is cute, though
+        desc: You are no longer thirsty. That Megumin sticker is cute, though
         action: ["status", "hydrate"]
 
   - &sandwich
-    desc: >
-      A sandwich of uncertain provenance. There are no visible signs of danger.
+    look:
+      chance: 1
+      succ:
+        desc: A sandwich of uncertain provenance. There are no visible signs of danger.
     take:
       chance: 0
-      succ:
+      fail:
         desc: Doesn't really seem very handy to carry around.
     use:
       chance: 1
-      desc: >
-        You take a big bite and immediately realize that not all dangers are visible.
-        Without even getting a chance to swallow, you are doomed.
-      outcome: ["end"]
+      succ:
+        desc: >
+          You take a big bite and immediately realize that not all dangers are visible.
+          Without even getting a chance to swallow, you are doomed.
+        outcome: ["end"]
 
   - &textbook
     alt: ["mechanical engineering textbook"]
-    desc: >
-      A super boring textbook/sedative combo.
-      Contains various diagrams and techniques for structural and mechanical engineering.
-    take:
-      desc: >
-        But it's heavy!
+    look:
       chance: 1
       succ:
+        desc: >
+          A super boring textbook/sedative combo.
+          Contains various diagrams and techniques for structural and mechanical engineering.
+    take:
+      chance: 1
+      succ:
+        desc: But it's heavy!
         outcome: ["take"]
     use:
-      desc: >
-        Against all odds, you already finished that homework. Strictly speaking.
+      chance: 1
+      succ:
+        desc: Against all odds, you already finished that homework. Strictly speaking.
 
   - &trashcan
-    desc: >
-      It is very full, ergo the garbage pile.
+    look:
+      chance: 1
+      succ:
+        desc: It is very full, ergo the garbage pile.
     take:
-      desc: >
-        That sounds hazardous.
       chance: 0
+      fail:
+        desc: That sounds hazardous.
     use:
-      desc: That ship has sailed.
+      chance: 0
+      fail:
+        desc: That ship has sailed.
 
   - &dresser
       look:
-        chance: 1
         require: ["status", "hydrate"]
+        chance: 1
         fail:
           desc: What dresser?
         succ:
           desc: A utilitarian dorm dresser, attached to the wall.
       take:
-        chance: 1
         require: ["status", "hydrate"]
+        chance: 1
         fail:
           desc: What dresser?
         succ:
           desc: It's literally attached to the wall.
       use:
-        chance: 1
         require: ["status", "hydrate"]
+        chance: 1
         fail:
           desc: What dresser?
         succ:
@@ -167,8 +206,7 @@ items:
       use:
         chance: 1
         succ:
-          desc: >
-            You're perfectly dry.
+          desc: You're perfectly dry.
 
 rooms:
   &bedroom bedroom:
@@ -198,14 +236,16 @@ rooms:
         <<: *bed
         look:
           chance: 1
-          desc: >
-            Her bed is perfectly made. You are nervous to stand next to
-            it for fear of messing it up by causing air currents.
+          succ:
+            desc: >
+              Her bed is perfectly made. You are nervous to stand next to
+              it for fear of messing it up by causing air currents.
         take:
           chance: 0
-          desc: >
-            It's attached to the wall, and your roommate's hands would be
-            attached to your throat if you messed it up.
+          fail:
+            desc: >
+              It's attached to the wall, and your roommate's hands would be
+              attached to your throat if you messed it up.
         use:
           chance: 0
           fail:
@@ -215,11 +255,12 @@ rooms:
         <<: *desk
         look:
           chance: 1
-          desc: >
-            Her desk is spotless and has nothing on it.
-            You dare not change either of those facts.
-            Under the desk is her trashcan.
-          outcome: ["reveal", "trashcan"]
+          succ:
+            desc: >
+              Her desk is spotless and has nothing on it.
+              You dare not change either of those facts.
+              Under the desk is her trashcan.
+            outcome: ["reveal", "trashcan"]
         take:
           chance: 0
           fail:
@@ -232,45 +273,38 @@ rooms:
       trashcan:
         <<: *trashcan
         hidden: true
-        look:
-          chance:
-          desc:
-        take:
-          chance:
-          desc:
-        use:
-          chance:
-          desc:
+        look: {}
+        take: {}
+        use: {}
       dresser:
         <<: *dresser
         look:
           chance: 1
-          desc: >
-            She would kill you if you went through those drawers.
-            On top you see two meticulously folded towels.
-          outcome: ["reveal", "towels"]
+          succ:
+            desc: >
+              She would kill you if you went through those drawers.
+              On top you see two meticulously folded towels.
+            outcome: ["reveal", "towels"]
         take:
           chance: 0
           fail:
             desc: It's bolted to the wall, and too heavy anyway.
-        use:
-          chance:
-          desc:
+        use: {}
       towels:
         <<: *towel
         look:
           chance: 1
-          desc: They are perfectly folded and fluffy from the laundry.
+          succ:
+            desc: They are perfectly folded and fluffy from the laundry.
         take:
           chance: 1
-          desc: >
-            Take towel (or towels):
-            You reach for the towels, then have a panic attack imagining what she
-            will do to you when she gets home. Your poor heart cannot take it.
-          outcome: ["end"]
-        use:
-          chance:
-          desc:
+          succ:
+            desc: >
+              Take towel (or towels):
+              You reach for the towels, then have a panic attack imagining what she
+              will do to you when she gets home. Your poor heart cannot take it.
+            outcome: ["end"]
+        use: {}
 
 start: *bedroom
 finish: *roommate
