@@ -27,7 +27,7 @@ class Player:
             if item_name := match.group("nouns"):
                 if item := get_item(self.items, item_name):
                     response(f"You look at {item_name}")
-                    if outcome := item.do("look"):
+                    if outcome := item("look"):
                         debug(outcome)
                     return None
                 response(f"Sorry, there is no '{item_name}' in your inventory.")

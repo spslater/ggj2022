@@ -21,8 +21,7 @@ class Action:
         for key, val in kwargs.items():
             setattr(self, key, val)
 
-    def do(self, prompt):
-        """perfrom action"""
+    def __call__(self, prompt):
         res = input(prompt)
         for verb in self.verbs.values():
             if match := verb.pattern.match(res):

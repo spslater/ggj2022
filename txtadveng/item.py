@@ -12,8 +12,7 @@ class ItemVerb:
         self.succ = succ or {}
         self.fail = fail or {}
 
-    def do(self):
-        """perform verb action"""
+    def __call__(self):
         if self.chanse:
             return self.succ.get("desc"), self.succ.get("outcome")
         return self.fail.get("desc"), self.fail.get("outcome")
@@ -53,10 +52,9 @@ class Item:
         for key, val in kwargs.items():
             setattr(self, key, val)
 
-    def do(self, act):
-        """perform item action"""
+    def __call__(self, act):
         if verb := self.verbs.get(act):
-            desc, outcome = verb.do()
+            desc, outcome = verb()
             response(desc)
             return outcome
         return None

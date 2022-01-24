@@ -9,7 +9,6 @@ player = Player(**config["player"])
 worldmap = Map(
     config["rooms"],
     config["start"],
-    config["finish"],
     config["map"],
 )
 acts = Action(config["verbs"])
@@ -17,7 +16,7 @@ player.location = worldmap.get_room(worldmap.start)
 
 response(config["intro"])
 while True:
-    verb, noun = acts.do("Action? ")
+    verb, noun = acts("Action? ")
     if verb is None:
         response("sorry, i do know that command")
         continue
