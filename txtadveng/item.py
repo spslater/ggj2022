@@ -7,13 +7,13 @@ from .helper import response
 class ItemVerb:
     def __init__(self, desc="", chance=1, require=None, succ=None, fail=None):
         self.desc = desc
-        self.chanse = chance
+        self.chance = chance
         self.require = require
         self.succ = succ or {}
         self.fail = fail or {}
 
-    def __call__(self):
-        if self.chanse:
+    def __call__(self, player):
+        if self.chance:
             return self.succ.get("desc"), self.succ.get("outcome")
         return self.fail.get("desc"), self.fail.get("outcome")
 
@@ -52,9 +52,9 @@ class Item:
         for key, val in kwargs.items():
             setattr(self, key, val)
 
-    def __call__(self, act):
+    def __call__(self, player, act):
         if verb := self.verbs.get(act):
-            desc, outcome = verb()
+            desc, outcome = verb(player)
             response(desc)
             return outcome
         return None

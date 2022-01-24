@@ -52,7 +52,16 @@ class Room:
     def enter(self):
         """enter a room and display description text"""
         response(f"You have entered {self.name}.")
-        response(self.desc)
+        if enter_txt := self.desc.get("enter"):
+            response(enter_txt)
+        if look_txt := self.desc.get("look"):
+            response(look_txt)
+        return self
+
+    def exit(self):
+        """exit a room"""
+        if exit_txt := self.desc.get("exit"):
+            response(exit_txt)
         return self
 
     def look(self, name):

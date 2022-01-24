@@ -210,11 +210,12 @@ items:
 
 rooms:
   &bedroom bedroom:
-    desc: >
-      You are standing next to your bed.
-      You see your desk and the garbage pile.
-      To the East lies your roommate's area.
-      To the South lies the door to the hallway (and showers).
+    desc:
+      look: >
+        You are standing next to your bed.
+        You see your desk and the garbage pile.
+        To the East lies your roommate's area.
+        To the South lies the door to the hallway (and showers).
     items:
       bed: *bed
       garbage: *garbage
@@ -227,10 +228,11 @@ rooms:
         <<: *towel
         hidden: true
   &roommate roommate:
-    enter: You walk over to your roommate's area of the room.
-    desc: >
-      It is completely pristine, like an architecture magazine.
-      You see her bed, her desk, and her dresser.
+    desc:
+      enter: You walk over to your roommate's area of the room.
+      look: >
+        It is completely pristine, like an architecture magazine.
+        You see her bed, her desk, and her dresser.
     items:
       bed:
         <<: *bed
@@ -314,15 +316,16 @@ map:
   *roommate:
     w: *bedroom
 
-verbs:
-  look: ["look at"]
-  take: ["fetch", "grab"]
-  use: []
-  move: ["go"]
-  quit: ["q"]
-
 player:
   status:
     hydrate: false
     tired: true
-  inventory: ["self", "me", "inventory", "inv"]
+
+synonyms:
+  look: ["l", "look at"]
+  take: ["t", "fetch", "grab"]
+  use: ["u"]
+  move: ["m", "go"]
+  quit: ["q", "exit", "e"]
+  inventory: ["i", "self", "me", "inventory", "inv"]
+  around: ["a", "room", "here"]

@@ -3,4 +3,3 @@ from .helper import *
 from .item import *
 from .player import *
 from .room import *
-from .verb import *
