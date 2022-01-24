@@ -269,14 +269,25 @@ rooms:
         use:
           chance: 0
           fail:
-            desc: There's nothing on it!
+            desc: I don't have any trash to put in it.
       trashcan:
         <<: *trashcan
         hidden: true
-        look: {}
-        take: {}
-        use: {}
-      dresser:
+        look:
+          chance: 1
+          succ:
+            desc: >
+              It is empty and strangely clean. It's almost asking to be filled.
+        take:
+          chance: 1
+          succ:
+            desc: >
+              You grab the trashcan. Maybe you can do some cleaning up.
+        use:
+          chance: 0
+          fail:
+            desc: Use it with what?
+      dresser: 
         <<: *dresser
         look:
           chance: 1
@@ -289,10 +300,14 @@ rooms:
           chance: 0
           fail:
             desc: It's bolted to the wall, and too heavy anyway.
-        use: {}
+        use:
+          chance: 0
+            fail:
+              desc: I dare not.
       towels:
         <<: *towel
-        look:
+        alt: [towel]
+        look: 
           chance: 1
           succ:
             desc: They are perfectly folded and fluffy from the laundry.

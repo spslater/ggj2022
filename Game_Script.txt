@@ -112,7 +112,9 @@ You are already holding the towel.
 [This is it for your side when you start. Now we do the other side.]
 
 Move East:
-You walk over to your roommate's area of the room. It is completely pristine, like an architecture magazine. You see her bed, her desk, and her dresser.
+You walk over to your roommate's area of the room. 
+
+It is completely pristine, like an architecture magazine. You see her bed, her desk, and her dresser.
 
 Look bed:
 Her bed is perfectly made. You are nervous to stand next to it for fear of messing it up by causing air currents.
@@ -157,20 +159,19 @@ Use trashcan:
 I don't have any trash to put in it.
 
 Take trashcan:
-You grab the trashcan. Maybe you can do some cleaning up. [This adds flag TrashHeld.] 
-//add trashcan to inventory  
+You grab the trashcan. Maybe you can do some cleaning up. [This adds flag TrashHeld.]
 
 [This is it for the roommate's area. With the trashcan, you can do more stuff on your side.]
 
 Go West:
 [Repeat the same description, but add that you can see the dresser if they have the Hydrated flag, both here and if they use "look" after they have it.]
 
-Use trashcan (TrashHeld): //if trash in inventory 
+Use trashcan (TrashHeld):
 Use it with what?
 
 Use trashcan with garbage pile (TrashHeld):
-It will surely collapse and kill me. If only there were a method to dismantle it safely... 
-[Set flag NeedMethod] //bool TrashCleared == F
+It will surely collapse and kill me. If only there were a method to dismantle it safely...
+[Set flag NeedMethod]
 
 Use textbook (NeedMethod): 
 Use it with what?
