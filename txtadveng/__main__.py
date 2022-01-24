@@ -1,16 +1,18 @@
+from argparse import ArgumentParser
+
 from .helper import debug, load_config, response
 from .player import Player
 from .room import Map
 from .verb import Action
 
-config = load_config("test.yml")
+parser = ArgumentParser(prog="txtadveng", description="text adventure engine")
+parser.add_argument("story", help="yaml file with story info")
+args = parser.parse_args()
+
+config = load_config(args.story)
 
 player = Player(**config["player"])
-worldmap = Map(
-    config["rooms"],
-    config["start"],
-    config["map"],
-)
+worldmap = Map(config["rooms"], config["start"], config["map"])
 acts = Action(config["verbs"])
 player.location = worldmap.get_room(worldmap.start)
 
