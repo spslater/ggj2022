@@ -1,22 +1,6 @@
 """Item"""
 import re
 
-from .helper import response
-
-
-class ItemVerb:
-    def __init__(self, desc="", chance=1, require=None, succ=None, fail=None):
-        self.desc = desc
-        self.chance = chance
-        self.require = require
-        self.succ = succ or {}
-        self.fail = fail or {}
-
-    def __call__(self, player):
-        if self.chance:
-            return self.succ.get("desc"), self.succ.get("outcome")
-        return self.fail.get("desc"), self.fail.get("outcome")
-
 
 def gen_items(items):
     """generate items from given list of dicts"""
@@ -37,24 +21,57 @@ def get_item(items, name):
     return None
 
 
+class ItemVerb:
+    def __init__(self, require=None, chance=1, succ=None, fail=None):
+        self.require = require
+        self.chance = chance
+        self.succ = succ or {}
+        self.fail = fail or {}
+
+    def __call__(self, player):
+        if self._require(player) and self.chance:
+            return True, self.succ.get("desc"), self.succ.get("outcome", [])
+        return False, self.fail.get("desc"), self.fail.get("outcome", [])
+
+    def _require(self, player):
+        if self.require is not None:
+            check = self.require[0]
+            if check == "status":
+                stat, val = self.require[1:3]
+                if val == player.status.get(stat):
+                    return True
+            return False
+        return True
+
+
 class Item:
     def __init__(self, name, **kwargs):
         self.name = name
-        names = "|".join([name] + kwargs.get("alt", []))
+        names = "|".join([name] + kwargs.pop("alt", []))
         self.pattern = re.compile(r"(?P<item>(" + names + r"))")
         self.quantity = kwargs.pop("quantity", 1)
+        self.status = kwargs.pop("status", {})
         self.verbs = {
             "look": ItemVerb(**kwargs.pop("look", {})),
             "take": ItemVerb(**kwargs.pop("take", {})),
             "use": ItemVerb(**kwargs.pop("use", {})),
         }
 
-        for key, val in kwargs.items():
-            setattr(self, key, val)
+    def look(self, player):
+        """look at item"""
+        return self.verbs["look"](player)
 
-    def __call__(self, player, act):
-        if verb := self.verbs.get(act):
-            desc, outcome = verb(player)
-            response(desc)
-            return outcome
-        return None
+    def take(self, player):
+        """take item"""
+        succ, desc, outcome = self.verbs["take"](player)
+        if succ:
+            if outcome is None:
+                outcome = []
+            if "take" not in outcome:
+                outcome += ["take"]
+            return True, desc, outcome
+        return False, desc, outcome
+
+    def use(self, player):
+        """use item"""
+        return self.verbs["use"](player)

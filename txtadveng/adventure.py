@@ -1,7 +1,6 @@
 import re
 
 from .helper import response, debug
-from .item import get_item
 from .player import Player
 from .room import Map
 
@@ -9,7 +8,7 @@ from .room import Map
 class Similar:
     def __init__(self, primary, synonyms):
         self.name = primary
-        syns = "|".join([primary] + synonyms)
+        syns = "|".join(sorted([primary] + synonyms, reverse=True))
         self.pattern = re.compile(r"(" + syns + r")\s*(?P<token>.*)?")
 
     def __call__(self, string):
@@ -40,19 +39,18 @@ class Adventure:
             self.config["start"],
             self.config["map"],
         )
-        self.acts = Synonyms(self.config["synonyms"])
-
+        self.syns = Synonyms(self.config["synonyms"])
         self.location = self.worldmap.get_room(self.worldmap.start)
 
-        names = "|".join(config.get("inventory", ["self"]))
-        self.inventory = re.compile(r"(?P<verb>(" + names + r"))\s*(?P<nouns>.*)?")
-
     def _start(self):
-        response(self.config["intro"])
-        self.location.enter()
+        if intro := self.config.get("intro"):
+            response(intro)
+        if look := self.location.desc.get("look"):
+            response(look)
 
     def _end(self):
-        pass
+        if outro := self.config.get("outro"):
+            response(outro)
 
     @staticmethod
     def _quit():
@@ -67,36 +65,21 @@ class Adventure:
 
     def _look(self, name):
         # look at an item in the current room or inventory
-        if (match := self.acts("inventory", name)) is not None:
-            if item_name := match.group("nouns"):
-                if item := get_item(self.items, item_name):
-                    response(f"You look at {item_name}")
-                    if outcome := item(self, "look"):
-                        debug(outcome)
-                    return
-                response(f"Sorry, there is no '{item_name}' in your inventory.")
-            elif items := self.items.keys():
-                names = ", ".join(items)
-                response(f"You look at the things you are carrying: {names}")
-            else:
-                response("You have no items right now.")
+        if self.player.look(self.syns, name) is not None:
+            return None
 
-        # look around room or at specific item
-        if self.acts("around", name) is not None:
-            response("You look around the room again.")
-            self.location.look("around")
-            return
+        if (outcome := self.location.look(self.syns, self.player, name)) is not None:
+            return outcome
 
-        if item := get_item(self.location.items, name):
-            response(f"You look at {name}")
-            if outcome := item("look"):
-                debug(outcome)
-            return
         response(f"Sorry, there is no item with the name '{name}' in the room.")
-
+        return None
 
     def _take(self, noun):
-        item, outcome = self.player.take(noun)
+        item, outcome = self.location.take(self.player, noun)
+        if item is not None:
+            self.player.take(item)
+        if outcome:
+            debug(outcome)
 
     def _use(self, noun):
         debug(f"using at '{noun}'")
@@ -106,16 +89,16 @@ class Adventure:
         self._start()
         while True:
             res = input("Action? ")
-            if self.acts("quit", res) is not None:
+            if self.syns("quit", res) is not None:
                 self._quit()
                 break
-            elif (loc := self.acts("move", res)) is not None:
+            elif (loc := self.syns("move", res)) is not None:
                 self._move(loc)
-            elif (name := self.acts("look", res)) is not None:
+            elif (name := self.syns("look", res)) is not None:
                 self._look(name)
-            elif (noun := self.acts("take", res)) is not None:
+            elif (noun := self.syns("take", res)) is not None:
                 self._take(noun)
-            elif (noun := self.acts("use", res)) is not None:
+            elif (noun := self.syns("use", res)) is not None:
                 self._use(noun)
             else:
                 response("sorry, i do know that command")

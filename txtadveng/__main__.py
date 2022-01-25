@@ -1,3 +1,4 @@
+import readline
 from argparse import ArgumentParser
 
 from .adventure import Adventure

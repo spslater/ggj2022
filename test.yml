@@ -93,7 +93,7 @@ items:
   - &water
     alt: ["water bottle", "bottle"]
     look:
-      require: ["status", "hydrate"]
+      require: ["status", "hydrate", true]
       chance: 1
       fail:
         desc: >
@@ -106,7 +106,7 @@ items:
       fail:
         desc: Why would you want to keep that on your person in your own room?
     use:
-      require: ["status", "hydrate"]
+      require: ["status", "hydrate", true]
       chance: 1
       fail:
         desc: >
@@ -116,7 +116,7 @@ items:
           You remember that you have a dresser!
       succ:
         desc: You are no longer thirsty. That Megumin sticker is cute, though
-        action: ["status", "hydrate"]
+        action: ["status", "hydrate", true]
 
   - &sandwich
     look:
@@ -147,7 +147,6 @@ items:
       chance: 1
       succ:
         desc: But it's heavy!
-        outcome: ["take"]
     use:
       chance: 1
       succ:
@@ -169,21 +168,21 @@ items:
 
   - &dresser
       look:
-        require: ["status", "hydrate"]
+        require: ["status", "hydrate", true]
         chance: 1
         fail:
           desc: What dresser?
         succ:
           desc: A utilitarian dorm dresser, attached to the wall.
       take:
-        require: ["status", "hydrate"]
-        chance: 1
+        require: ["status", "hydrate", true]
+        chance: 0
         fail:
           desc: What dresser?
         succ:
           desc: It's literally attached to the wall.
       use:
-        require: ["status", "hydrate"]
+        require: ["status", "hydrate", true]
         chance: 1
         fail:
           desc: What dresser?
@@ -202,7 +201,6 @@ items:
         chance: 1
         succ:
           desc: You drape the towel over your neck. Towel acquired!
-          action: ["take"]
       use:
         chance: 1
         succ:
@@ -211,6 +209,7 @@ items:
 rooms:
   &bedroom bedroom:
     desc:
+      enter: You walk back over to your sie of the room.
       look: >
         You are standing next to your bed.
         You see your desk and the garbage pile.
@@ -226,7 +225,8 @@ rooms:
       trashcan: *trashcan
       towel:
         <<: *towel
-        hidden: true
+        status:
+          hidden: true
   &roommate roommate:
     desc:
       enter: You walk over to your roommate's area of the room.
@@ -324,7 +324,6 @@ rooms:
         use: {}
 
 start: *bedroom
-finish: *roommate
 map:
   *bedroom:
     e: *roommate
@@ -342,5 +341,5 @@ synonyms:
   use: ["u"]
   move: ["m", "go"]
   quit: ["q", "exit", "e"]
-  inventory: ["i", "self", "me", "inventory", "inv"]
+  inventory: ["self", "me", "inv", "i"]
   around: ["a", "room", "here"]
