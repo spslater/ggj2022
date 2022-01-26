@@ -1,59 +1,46 @@
 """Player"""
-import re
-
 from .helper import debug, response
 from .item import get_item
 
 
 class Player:
-    def __init__(self, items=None, status=None, **kwargs):
+    def __init__(self, items=None, status=None):
         self.items = items or {}
         self.status = status or {}
-        self.worldmap = None
-        self.location = None
 
-        for key, val in kwargs.items():
-            setattr(self, key, val)
+    def find(self, name):
+        """find item in inventory"""
+        return get_item(self.items, name)
 
-    def loadmap(self, worldmap):
-        """save worldmap and set starting location"""
-        self.worldmap = worldmap
-        start = self.worldmap.start
-        self.location = self.worldmap.get_room(start)
-
-    def move(self, room):
-        """move to a new room"""
-        self.location = room
-        self.location.enter()
-
-    def look(self, name):
+    def look(self, syns, name):
         """look at an item in the current room or inventory"""
-        if match := self.inventory.match(name):
-            if item_name := match.group("nouns"):
-                if item := get_item(self.items, item_name):
+        if (item_name := syns("inventory", name)) is not None:
+            if item_name:
+                if item := self.find(item_name):
                     response(f"You look at {item_name}")
-                    if outcome := item(self, "look"):
+                    if outcome := item.look(self):
                         debug(outcome)
-                    return None
+                        return outcome
                 response(f"Sorry, there is no '{item_name}' in your inventory.")
             elif items := self.items.keys():
                 names = ", ".join(items)
                 response(f"You look at the things you are carrying: {names}")
             else:
                 response("You have no items right now.")
-            return None
-        return self.location.look(name)
+            return True
+        return None
 
-    def take(self, name):
+    def take(self, item):
         """take an item from the current room"""
-        item, outcome = self.location.take(name)
-        if item is None:
-            response(f"No item named '{name}' to take")
-            return None, None
-        if outcome == "take":
-            name = item.name
-            if name in self.items:
-                self.items[name].quantity += 1
-            else:
-                self.items[name] = item
-        return item, outcome
+        name = item.name
+        if name in self.items:
+            self.items[name].quantity += 1
+        else:
+            self.items[name] = item
+
+    def use(self, name):
+        if item := self.find(name):
+            desc, outcome = item.use(self)
+            response(desc)
+            return item, outcome
+        return None, None

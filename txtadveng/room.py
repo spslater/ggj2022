@@ -1,18 +1,15 @@
 """Room and Map"""
 from copy import deepcopy
 
-from .helper import debug, response
+from .helper import response
 from .item import gen_items, get_item
 
 
 class Map:
-    def __init__(self, rooms, start, graph, **kwargs):
+    def __init__(self, rooms, start, graph):
+        self.rooms = gen_rooms(rooms)
         self.start = start
         self.graph = graph
-        self.rooms = gen_rooms(rooms)
-
-        for key, val in kwargs.items():
-            setattr(self, key, val)
 
     def get_room(self, name):
         """get the room with the given name in the map"""
@@ -41,17 +38,13 @@ def gen_rooms(rooms):
 
 
 class Room:
-    def __init__(self, name, desc, items, **kwargs):
+    def __init__(self, name, desc, items):
         self.name = name
         self.desc = desc
         self.items = gen_items(items)
 
-        for key, val in kwargs.items():
-            setattr(self, key, val)
-
     def enter(self):
         """enter a room and display description text"""
-        response(f"You have entered {self.name}.")
         if enter_txt := self.desc.get("enter"):
             response(enter_txt)
         if look_txt := self.desc.get("look"):
@@ -64,40 +57,44 @@ class Room:
             response(exit_txt)
         return self
 
-    def look(self, name):
+    def find(self, name):
+        """find item in the room"""
+        return get_item(self.items, name)
+
+    def look(self, syns, player, name):
         """look around room or at specific item"""
-        if name == "around":
-            response("You look around the room again.")
-            response(self.desc)
-            return
+        if syns("around", name) is not None or name == "":
+            if desc := self.desc.get("look"):
+                response(desc)
+            return None, []
 
-        if item := get_item(self.items, name):
-            response(f"You look at {name}")
-            if outcome := item("look"):
-                debug(outcome)
-            return
-        response(f"Sorry, there is no item with the name '{name}' in the room.")
-        return
+        if item := self.find(name):
+            _, desc, outcome = item.look(player)
+            if desc:
+                response(desc)
+            return item, outcome
+        return None, None
 
-    def take(self, name):
+    def take(self, player, name):
         """take item from room"""
-        val = None
+        new = None
         outcome = None
-        if item := get_item(self.items, name):
-            outcome = item("take")
-            val = deepcopy(item)
-            if item.quantity > 1:
-                item.quantity -= 1
-                val.quantity = 1
-            elif item.quantity == 1:
-                del self.items[item.name]
-        return val, outcome
+        if item := self.find(name):
+            succ, desc, outcome = item.take(player)
+            response(desc)
+            if succ:
+                new = deepcopy(item)
+                if item.quantity > 1:
+                    item.quantity -= 1
+                    new.quantity = 1
+                elif item.quantity == 1:
+                    del self.items[item.name]
+        return new, outcome
 
-    def give(self, name):
-        """give item back to room?"""
-        if item := get_item(self.items, name):
-            name = item.name
-            if name in self.items:
-                self.items[name].append(item)
-            else:
-                self.items[name] = item
+    def use(self, player, name):
+        """use the item"""
+        if item := self.find(name):
+            desc, outcome = item.use(player)
+            response(desc)
+            return item, outcome
+        return None, None
