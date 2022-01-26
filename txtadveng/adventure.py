@@ -1,10 +1,11 @@
 import re
 from enum import Enum, auto
 
-from .helper import response, debug
+from .helper import response, debug, Display
 from .player import Player
 from .room import Map
 
+display = Display()
 
 class Similar:
     def __init__(self, primary, synonyms):
