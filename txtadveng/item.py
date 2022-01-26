@@ -57,6 +57,9 @@ class Item:
             "use": ItemVerb(**kwargs.pop("use", {})),
         }
 
+    def __repr__(self):
+        return f"Item(name={self.name}, status={self.status})"
+
     def look(self, player):
         """look at item"""
         return self.verbs["look"](player)
@@ -74,4 +77,5 @@ class Item:
 
     def use(self, player):
         """use item"""
-        return self.verbs["use"](player)
+        _, desc, outcome = self.verbs["use"](player)
+        return desc, outcome

@@ -106,17 +106,17 @@ items:
       fail:
         desc: Why would you want to keep that on your person in your own room?
     use:
-      require: ["status", "hydrate", true]
+      require: ["status", "hydrate", false]
       chance: 1
       fail:
+        desc: You are no longer thirsty. That Megumin sticker is cute, though
+      succ:
         desc: >
           You take a long pull of lukewarm water.
           You must have been dehydrated because
           your headache dissipates and your head clears.
           You remember that you have a dresser!
-      succ:
-        desc: You are no longer thirsty. That Megumin sticker is cute, though
-        action: ["status", "hydrate", true]
+        outcome: ["status", "hydrate", true]
 
   - &sandwich
     look:
@@ -191,7 +191,7 @@ items:
             Searching through the dresser's mostly barren drawers
             (standing on the rug made of dirty laundry in front of it),
             you find a phenomenal treasure: a clean towel!
-          action: reveal towel
+          outcome: ["reveal", "towel"]
   - &towel
       look:
         chance: 1
@@ -219,6 +219,10 @@ rooms:
       bed: *bed
       garbage: *garbage
       desk: *desk
+      dresser:
+        <<: *dresser
+        status:
+          hidden: true
       water: *water
       sandwich: *sandwich
       textbook: *textbook
@@ -343,3 +347,4 @@ synonyms:
   quit: ["q", "exit", "e"]
   inventory: ["self", "me", "inv", "i"]
   around: ["a", "room", "here"]
+  status: ["s", "stat"]

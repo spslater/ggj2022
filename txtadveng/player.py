@@ -37,3 +37,10 @@ class Player:
             self.items[name].quantity += 1
         else:
             self.items[name] = item
+
+    def use(self, name):
+        if item := self.find(name):
+            desc, outcome = item.use(self)
+            response(desc)
+            return item, outcome
+        return None, None

@@ -1,4 +1,5 @@
 import re
+from enum import Enum, auto
 
 from .helper import response, debug
 from .player import Player
@@ -27,6 +28,13 @@ class Synonyms:
         if similar := getattr(self, primary, None):
             return similar(string)
         return None
+
+
+class Outcome(Enum):
+    NONE = auto()
+    END = auto()
+    STATUS = auto()
+    VISIBLE = auto()
 
 
 class Adventure:
@@ -62,44 +70,76 @@ class Adventure:
             self.location = room.enter()
         else:
             response("no room in that direction")
+        return Outcome.NONE
 
     def _look(self, name):
         # look at an item in the current room or inventory
         if self.player.look(self.syns, name) is not None:
-            return None
+            return Outcome.NONE
 
-        if (outcome := self.location.look(self.syns, self.player, name)) is not None:
-            return outcome
+        item, outcome = self.location.look(self.syns, self.player, name)
+        if outcome is not None:
+            return self._outcome(item, outcome)
 
         response(f"Sorry, there is no item with the name '{name}' in the room.")
-        return None
+        return Outcome.NONE
 
     def _take(self, noun):
         item, outcome = self.location.take(self.player, noun)
-        if item is not None:
-            self.player.take(item)
-        if outcome:
-            debug(outcome)
+        if item is None:
+            return None, None
+        self.player.take(item)
+        return self._outcome(item, outcome)
 
     def _use(self, noun):
-        debug(f"using at '{noun}'")
+        item, outcome = self.location.use(self.player, noun)
+        if item is None:
+            item, outcome = self.player.use(noun)
+
+        if item is None:
+            response(f"Sorry, there is no item with the name '{noun}' to use.")
+            return
+
+        return self._outcome(item, outcome)
+
+    def _outcome(self, item, outcome):
+        """execute the outcome associated with item"""
+        debug(item, outcome)
+        if not outcome:
+            return Outcome.NONE
+        if "status" == outcome[0]:
+            self.player.status[outcome[1]] = outcome[2]
+            return Outcome.NONE
+        if "reveal" == outcome[0]:
+            item.status[outcome[1]] = True
+            return Outcome.NONE
+        if "end" == outcome[0]:
+            return Outcome.END
+        return Outcome.NONE
+
 
     def run(self):
         """run the adventure"""
         self._start()
+        outcome = Outcome.NONE
         while True:
             res = input("Action? ")
             if self.syns("quit", res) is not None:
                 self._quit()
                 break
-            elif (loc := self.syns("move", res)) is not None:
-                self._move(loc)
+            if (loc := self.syns("move", res)) is not None:
+                outcome = self._move(loc)
             elif (name := self.syns("look", res)) is not None:
-                self._look(name)
+                outcome = self._look(name)
             elif (noun := self.syns("take", res)) is not None:
-                self._take(noun)
+                outcome = self._take(noun)
             elif (noun := self.syns("use", res)) is not None:
-                self._use(noun)
+                outcome = self._use(noun)
+            elif (noun := self.syns("status", res)) is not None:
+                debug(self.player.status)
             else:
                 response("sorry, i do know that command")
+            if outcome is Outcome.END:
+                self._quit()
+                break
         self._end()

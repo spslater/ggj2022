@@ -64,16 +64,16 @@ class Room:
     def look(self, syns, player, name):
         """look around room or at specific item"""
         if syns("around", name) is not None or name == "":
-            if look_txt := self.desc.get("look"):
-                response(look_txt)
-            return []
+            if desc := self.desc.get("look"):
+                response(desc)
+            return None, []
 
         if item := self.find(name):
             _, desc, outcome = item.look(player)
             if desc:
                 response(desc)
-            return outcome
-        return None
+            return item, outcome
+        return None, None
 
     def take(self, player, name):
         """take item from room"""
@@ -91,11 +91,10 @@ class Room:
                     del self.items[item.name]
         return new, outcome
 
-    def give(self, name):
-        """give item back to room?"""
+    def use(self, player, name):
+        """use the item"""
         if item := self.find(name):
-            name = item.name
-            if name in self.items:
-                self.items[name].append(item)
-            else:
-                self.items[name] = item
+            desc, outcome = item.use(player)
+            response(desc)
+            return item, outcome
+        return None, None
