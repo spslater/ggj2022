@@ -1,10 +1,9 @@
 import re
 from enum import Enum, auto
 
-from .helper import response, debug
+from .helper import DISPLAY as display
 from .player import Player
 from .room import Map
-
 
 class Similar:
     def __init__(self, primary, synonyms):
@@ -52,24 +51,24 @@ class Adventure:
 
     def _start(self):
         if intro := self.config.get("intro"):
-            response(intro)
+            display.info(intro)
         if look := self.location.desc.get("look"):
-            response(look)
+            display.info(look)
 
     def _end(self):
         if outro := self.config.get("outro"):
-            response(outro)
+            display.info(outro)
 
     @staticmethod
     def _quit():
-        response("thanks for playing!")
+        display.info("thanks for playing!")
 
     def _move(self, loc):
         if room := self.worldmap.move(self.location, loc):
             self.location.exit()
             self.location = room.enter()
         else:
-            response("no room in that direction")
+            display.info("no room in that direction")
         return Outcome.NONE
 
     def _look(self, name):
@@ -81,7 +80,7 @@ class Adventure:
         if outcome is not None:
             return self._outcome(item, outcome)
 
-        response(f"Sorry, there is no item with the name '{name}' in the room.")
+        display.info("Sorry, there is no item with the name '%s' in the room.", name)
         return Outcome.NONE
 
     def _take(self, noun):
@@ -97,14 +96,14 @@ class Adventure:
             item, outcome = self.player.use(noun)
 
         if item is None:
-            response(f"Sorry, there is no item with the name '{noun}' to use.")
+            display.info("Sorry, there is no item with the name '%s' to use.", noun)
             return
 
         return self._outcome(item, outcome)
 
     def _outcome(self, item, outcome):
         """execute the outcome associated with item"""
-        debug(item, outcome)
+        display.debug("%s: %s", item, outcome)
         if not outcome:
             return Outcome.NONE
         if "status" == outcome[0]:
@@ -136,9 +135,9 @@ class Adventure:
             elif (noun := self.syns("use", res)) is not None:
                 outcome = self._use(noun)
             elif (noun := self.syns("status", res)) is not None:
-                debug(self.player.status)
+                display.debug(self.player.status)
             else:
-                response("sorry, i do know that command")
+                display.info("sorry, i do know that command")
             if outcome is Outcome.END:
                 self._quit()
                 break

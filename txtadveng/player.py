@@ -1,5 +1,5 @@
 """Player"""
-from .helper import debug, response
+from .helper import DISPLAY as display
 from .item import get_item
 
 
@@ -17,16 +17,16 @@ class Player:
         if (item_name := syns("inventory", name)) is not None:
             if item_name:
                 if item := self.find(item_name):
-                    response(f"You look at {item_name}")
+                    display.info("You look at %s", item_name)
                     if outcome := item.look(self):
-                        debug(outcome)
+                        display.debug("%s", outcome)
                         return outcome
-                response(f"Sorry, there is no '{item_name}' in your inventory.")
+                display.info("Sorry, there is no '%s' in your inventory.", item_name)
             elif items := self.items.keys():
                 names = ", ".join(items)
-                response(f"You look at the things you are carrying: {names}")
+                display.info("You look at the things you are carrying: %s", names)
             else:
-                response("You have no items right now.")
+                display.info("You have no items right now.")
             return True
         return None
 
@@ -39,8 +39,9 @@ class Player:
             self.items[name] = item
 
     def use(self, name):
+        """use an item"""
         if item := self.find(name):
             desc, outcome = item.use(self)
-            response(desc)
+            display.info(desc)
             return item, outcome
         return None, None
