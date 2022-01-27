@@ -2,21 +2,24 @@
 import readline
 from argparse import ArgumentParser
 
-from . import DISPLAY as display
 from .adventure import Adventure
-from .helper import load_config, Display, set_levels
+from .helper import load_config, set_levels, DISPLAY as display
 
-set_levels("?", ">")
-
-display.setVerbosity(2)
-display.debug("really debug world", verbosity=3)
-display.debug("debug world", verbosity=2)
-display.info("hello world", verbosity=1)
-print()
-
+set_levels("?", "")
 parser = ArgumentParser(prog="txtadveng", description="text adventure engine")
 parser.add_argument("story", help="yaml file with story info")
+parser.add_argument(
+    "-v",
+    "--verbose",
+    action="count",
+    default=0,
+    help="set the level of output verbosity",
+)
 args = parser.parse_args()
+
+
+display.setVerbosity(args.verbose)
+display.debug("verbose level: %s", args.verbose)
 
 config = load_config(args.story)
 story = Adventure(config)

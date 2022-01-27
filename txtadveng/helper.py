@@ -11,27 +11,28 @@ def load_config(filename):
         return yaml.load(fp, Loader=yaml.FullLoader)
 
 
-def response(*args):
-    """display game response"""
-    logging.info(" ".join([str(a) for a in args]))
-
-
-def debug(*args):
-    """display a debug message"""
-    logging.debug(" ".join([str(a) for a in args]))
-
-
+# pylint: disable=too-many-arguments
 def set_levels(debug=None, info=None, warning=None, error=None, critical=None):
     """Set the displayed 'level name' for different level"""
     if debug is not None:
+        if debug != "" and debug[-1] != " ":
+            debug += " "
         logging.addLevelName(logging.DEBUG, debug)
     if info is not None:
+        if info != "" and info[-1] != " ":
+            info += " "
         logging.addLevelName(logging.INFO, info)
     if warning is not None:
+        if warning != "" and warning[-1] != " ":
+            warning += " "
         logging.addLevelName(logging.WARNING, warning)
     if error is not None:
+        if error != "" and error[-1] != " ":
+            error += " "
         logging.addLevelName(logging.ERROR, error)
     if critical is not None:
+        if critical != "" and critical[-1] != " ":
+            critical += " "
         logging.addLevelName(logging.CRITICAL, critical)
 
 
@@ -41,13 +42,14 @@ class Display:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
         handler = logging.StreamHandler(stdout)
-        handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
+        handler.setFormatter(logging.Formatter("%(levelname)s%(message)s"))
         self.logger.addHandler(handler)
 
-    # pylint: disable=invalidName
+    # pylint: disable=invalid-name
     def setVerbosity(self, value):
         """change the verbosity level for the output"""
         self.verbosity = int(value)
+        return self
 
     def debug(self, *args, verbosity=-1, **kwargs):
         """debug level logging if it is above the current verbosity level"""
@@ -73,3 +75,5 @@ class Display:
         """critical level logging if it is above the current verbosity level"""
         if verbosity <= self.verbosity:
             self.logger.critical(*args, **kwargs)
+
+DISPLAY = Display()

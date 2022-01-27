@@ -3,5 +3,3 @@ from .helper import *
 from .item import *
 from .player import *
 from .room import *
-
-DISPLAY = Display()
